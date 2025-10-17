@@ -24,9 +24,23 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack, next);
-  res.status(500).json({ message: 'Something went wrong!' });
+app.use((err, req, res) => {
+  // Log error details
+  console.error('Error:', {
+    message: err.message,
+    stack: err.stack,
+    method: req.method,
+    url: req.originalUrl,
+    body: req.body,
+    params: req.params,
+    query: req.query,
+  });
+  // Send error response
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : undefined,
+  });
 });
 
 // 404 handler

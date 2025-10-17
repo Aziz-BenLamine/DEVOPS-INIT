@@ -1,7 +1,7 @@
 const Task = require('../models/Task');
 
 // Get all tasks
-const getAllTasks = async (req, res) => {
+const getAllTasks = async (req, res, next) => {
   try {
     const tasks = await Task.find().sort({ createdAt: -1 });
     res.status(200).json({
@@ -10,16 +10,12 @@ const getAllTasks = async (req, res) => {
       data: tasks,
     });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch tasks',
-    });
+    next(error);
   }
 };
 
 // Create a new task
-const createTask = async (req, res) => {
+const createTask = async (req, res, next) => {
   try {
     const { title, description } = req.body;
 
@@ -42,8 +38,6 @@ const createTask = async (req, res) => {
       data: task,
     });
   } catch (error) {
-    console.error('Error creating task:', error);
-
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
@@ -51,16 +45,12 @@ const createTask = async (req, res) => {
         message: messages.join(', '),
       });
     }
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create task',
-    });
+    next(error);
   }
 };
 
 // Delete a task
-const deleteTask = async (req, res) => {
+const deleteTask = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -78,11 +68,7 @@ const deleteTask = async (req, res) => {
       message: 'Task deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting task:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete task',
-    });
+    next(error);
   }
 };
 
